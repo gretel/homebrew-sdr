@@ -12,8 +12,6 @@ Formulae are then available as `gretel/sdr/<formula>`.
 
 ## Formulae
 
-Sorted by dependency order — each formula only depends on those above it.
-
 ### [`libiio`](https://github.com/analogdevicesinc/libiio) — 0.26
 
 Analog Devices' C library for reading and writing Linux IIO
