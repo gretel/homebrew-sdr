@@ -12,13 +12,7 @@ Formulae are then available as `gretel/sdr/<formula>`.
 
 ## Formulae
 
-### [`libad9361-iio`](https://github.com/analogdevicesinc/libad9361-iio) — 0.3
-
-Helper library on top of `libiio` for the AD9361 — the wideband RF
-transceiver chip inside the ADALM-PLUTO SDR and many AD9361
-development boards. Handles baseband rate setup, filter
-programming, and other AD9361-specific configuration that plain
-`libiio` can't do.
+Sorted by dependency order — each formula only depends on those above it.
 
 ### [`libiio`](https://github.com/analogdevicesinc/libiio) — 0.26
 
@@ -28,22 +22,15 @@ that expose themselves through the kernel IIO subsystem. The
 foundation for talking to any ADI hardware from userspace — over
 USB, over the network, or against a local sysfs tree.
 
-### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.1+git
+### [`libad9361-iio`](https://github.com/analogdevicesinc/libad9361-iio) — 0.3
 
-A SoapySDR module for the PlutoSDR. SoapySDR is the vendor-neutral
-SDR abstraction layer used by GNU Radio, CubicSDR, SDRangel, and
-similar tools. This fork of the upstream Pluto plugin adds CS8 and
-CS12 streaming sample formats on top of the usual float32 — useful
-when USB bandwidth becomes the bottleneck at high sample rates, or
-when passing samples through a gateway that prefers fixed-point.
+*Depends on: `libiio`*
 
-### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.1
-
-SoapySDR plugin that exposes UHD/USRP devices through the
-SoapySDR abstraction layer, making them available to any tool
-that uses SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.).
-Works with either stock `uhd` or `gretel/sdr/uhd-oc` — install
-whichever is present before installing this formula.
+Helper library on top of `libiio` for the AD9361 — the wideband RF
+transceiver chip inside the ADALM-PLUTO SDR and many AD9361
+development boards. Handles baseband rate setup, filter
+programming, and other AD9361-specific configuration that plain
+`libiio` can't do.
 
 ### [`uhd-oc`](https://github.com/EttusResearch/uhd) — 4.9.0.1-oc
 
@@ -55,6 +42,25 @@ officially supported sample rates. The overclock patch is from
 applied at build time; no FPGA or firmware changes.
 
 **Conflicts with the stock `uhd` formula** — you must
-`brew uninstall uhd` first. `brew info gretel/sdr/uhd-oc`
-prints the full swap procedure including how to preserve the FPGA
-image directory across the swap.
+`brew uninstall uhd` first.
+
+### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.1+git
+
+*Depends on: `libiio`, `libad9361-iio`*
+
+A SoapySDR module for the PlutoSDR. SoapySDR is the vendor-neutral
+SDR abstraction layer used by GNU Radio, CubicSDR, SDRangel, and
+similar tools. This fork of the upstream Pluto plugin adds CS8 and
+CS12 streaming sample formats on top of the usual float32 — useful
+when USB bandwidth becomes the bottleneck at high sample rates, or
+when passing samples through a gateway that prefers fixed-point.
+
+### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.1
+
+*Depends on: `uhd-oc` (or stock `uhd`)*
+
+SoapySDR plugin that exposes UHD/USRP devices through the
+SoapySDR abstraction layer, making them available to any tool
+that uses SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.).
+Works with either stock `uhd` or `gretel/sdr/uhd-oc` — install
+whichever is present before installing this formula.
