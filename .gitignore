@@ -1,0 +1,14 @@
+# Homebrew tap working files
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# brew audit / livecheck scratch
+*.log
+
+# brew install --build-from-source artefacts (shouldn't appear in tap dir
+# but defensively ignore)
+build/
+*.bottle*
