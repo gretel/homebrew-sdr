@@ -50,3 +50,11 @@ applied at build time; no FPGA or firmware changes.
 `brew uninstall uhd` first. `brew info gretel/sdr/uhd-oc`
 prints the full swap procedure including how to preserve the FPGA
 image directory across the swap.
+
+### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.1
+
+SoapySDR plugin that exposes UHD/USRP devices through the
+SoapySDR abstraction layer, making them available to any tool
+that uses SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.).
+Works with either stock `uhd` or `gretel/sdr/uhd-oc` — install
+whichever is present before installing this formula.
