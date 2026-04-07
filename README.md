@@ -28,7 +28,7 @@ that expose themselves through the kernel IIO subsystem. The
 foundation for talking to any ADI hardware from userspace — over
 USB, over the network, or against a local sysfs tree.
 
-### [`soapy-pluto-papr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.1+git
+### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.1+git
 
 A SoapySDR module for the PlutoSDR. SoapySDR is the vendor-neutral
 SDR abstraction layer used by GNU Radio, CubicSDR, SDRangel, and

@@ -6,7 +6,7 @@
 # the in-tree "tezuka" naming to "papr" via inreplace at install time
 # so the SoapySDR module registers as "plutoPAPR" rather than "tezuka",
 # disambiguating from any other "tezuka"-named SoapySDR modules.
-class SoapyPlutoPapr < Formula
+class Soapyplutopapr < Formula
   desc "SoapySDR plugin for PlutoSDR with extended Tezuka/PAPR streaming formats"
   homepage "https://github.com/F5OEO/SoapyPlutoPAPR"
   # Pinned to commit ec1c92d (post-0.2.1, includes the CS8/CS16 fixes
@@ -60,19 +60,11 @@ class SoapyPlutoPapr < Formula
   end
 
   test do
-    # Use SoapySDRUtil --info to enumerate loaded modules. The plugin
-    # registers under the kwarg "driver=plutoPAPR" (after our rename)
-    # which appears in --info output once the module is found via the
-    # SoapySDR loader.
     output = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --info 2>&1")
     assert_match "Module", output
     assert_match "Soapy", output
 
-    # Probe for the registered module name. With no Pluto attached, the
-    # find call returns an empty list cleanly without error.
     probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=plutoPAPR 2>&1")
-    # Either "No devices found" or an actual device entry -- both are
-    # success: the module loaded and accepted the driver kwarg.
     assert_match(/(No devices found|Found device)/, probe)
   end
 end
