@@ -1,6 +1,6 @@
 # homebrew-sdr
 
-Homebrew tap to keg off additional formulae related to SDR.
+Homebrew tap to keg off additional formulae related to [SDR](https://en.wikipedia.org/wiki/Software-defined_radio).
 
 ## Tap
 
