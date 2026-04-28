@@ -15,8 +15,8 @@ class UhdOc < Formula
 
   desc "UHD with AD9361 overclock patch (122.88 MS/s)"
   homepage "https://files.ettus.com/manual/"
-  url "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.9.0.1.tar.gz"
-  sha256 "0be26a139f23041c1fb6e9666d84cba839460e3c756057dc48dc067cc356a7bc"
+  url "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.10.0.0.tar.gz"
+  sha256 "a9c66b52abcd586b513999f3a52345807b7551d01efac8c98eed813838be0297"
   license all_of: [
     "GPL-3.0-or-later",
     "LGPL-3.0-or-later",
@@ -24,6 +24,7 @@ class UhdOc < Formula
     "BSD-3-Clause",
     "Apache-2.0",
   ]
+  compatibility_version 1
   head "https://github.com/EttusResearch/uhd.git", branch: "master"
 
   livecheck do
@@ -36,7 +37,7 @@ class UhdOc < Formula
   depends_on "pkgconf" => :build
   depends_on "boost"
   depends_on "libusb"
-  depends_on "python3"
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "ncurses"
@@ -45,21 +46,25 @@ class UhdOc < Formula
   conflicts_with "uhd",
     because: "both install libuhd, uhd_usrp_probe, and the same UHD headers"
 
+  pypi_packages package_name:   "",
+                extra_packages: "mako"
+
   resource "mako" do
-    url "https://files.pythonhosted.org/packages/9e/38/bd5b78a920a64d708fe6bc8e0a2c075e1389d53bef8413725c63ba041535/mako-1.3.10.tar.gz"
-    sha256 "99579a6f39583fa7e5630a28c3c1f440e4e97a414b80372649c0ce338da2ea28"
+    url "https://files.pythonhosted.org/packages/59/8a/805404d0c0b9f3d7a326475ca008db57aea9c5c9f2e1e39ed0faa335571c/mako-1.3.11.tar.gz"
+    sha256 "071eb4ab4c5010443152255d77db7faa6ce5916f35226eb02dc34479b6858069"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/b2/97/5d42485e71dfc078108a86d6de8fa46db44a1a9295e89c5d6d4a06e23a62/markupsafe-3.0.2.tar.gz"
-    sha256 "ee55d3edf80167e48ea11a923c7386f4669df67d7994554387f84e7d8b0a2bf0"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
-  # setuptools is not bundled in python3's ensurepip (PEP 632 removed it
-  # from default venvs starting in 3.12), but UHD's host/python build
-  # calls `setup.py` which imports it. Stock homebrew-core `uhd` gets
-  # away with this because it always pours from a bottle built on CI
-  # that happens to have setuptools in scope; source builds need
+  # setuptools is not bundled in python's ensurepip (PEP 632 removed it
+  # from default venvs starting in 3.12), but UHD's host/python/CMakeLists.txt
+  # invokes `python setup.py -q build` directly (no PEP 517 isolation),
+  # which imports setuptools at parse time. Stock homebrew-core `uhd` gets
+  # away with this because it pours from a CI-built bottle whose build
+  # environment happens to have setuptools in scope; source builds need
   # setuptools in the venv explicitly.
   resource "setuptools" do
     url "https://files.pythonhosted.org/packages/4f/db/cfac1baf10650ab4d1c111714410d2fbb77ac5a616db26775db562c8fab2/setuptools-82.0.1.tar.gz"
@@ -70,7 +75,12 @@ class UhdOc < Formula
   # to 122.88 MS/s, adds new sample-rate brackets, and bypasses the FIR
   # filters above 70 MS/s. Host-side only (single file: ad9361_device.cpp).
   #
-  # Source:    https://github.com/MothMaux/uhd-oc (3 commits)
+  # Source:    https://github.com/MothMaux/uhd-oc (master @ 4c3086d, 5 cpp commits)
+  #            771b74f Overclock allow
+  #            c048216 FIR Filter fix      (rxfilt 11001100, rfir_factor=0)
+  #            3480b60 Timing change removed (drop WIP +0x22 margin)
+  #            f2af59b 104e6-122.88e6 Samplerates Fix (poke8 0x006 timing)
+  #            4d276ea whoopsies           (missing semicolons)
   # Canonical: gr4-lora/docs/ad9361-overclock.patch
   # Risks:     no FIR filtering above 70 MS/s, ADC rates >100 MS/s outside
   #            AD9361 spec, not validated by Analog Devices or Ettus.
@@ -78,17 +88,22 @@ class UhdOc < Formula
   patch :DATA
 
   def python3
-    "python3"
+    "python3.14"
   end
 
   def install
+    # Boost 1.89+ compatibility -- mirror upstream `uhd` formula. The
+    # `system` Boost component was renamed/removed; UHDConfig.cmake.in
+    # still lists it, breaking find_package(Boost) consumers.
+    inreplace "host/cmake/Modules/UHDConfig.cmake.in", /\s+system\n/, ""
+
     venv = virtualenv_create(buildpath/"venv", python3)
     venv.pip_install resources
     ENV.prepend_path "PYTHONPATH", venv.site_packages
 
     # UHD's host/lib/CMakeLists.txt adds `-flat_namespace` to libuhd
-    # on APPLE (line ~213). This is an obsolete workaround for a
-    # macOS linker quirk from the debian packaging era -- but today
+    # on APPLE (line ~228 in 4.10.0.0). This is an obsolete workaround
+    # for a macOS linker quirk from the debian packaging era -- but today
     # it triggers `brew audit` warnings (flat-namespace libraries).
     # Remove the line so libuhd links with the default two-level
     # namespace. The accompanying `-undefined,dynamic_lookup` line is
@@ -102,7 +117,7 @@ class UhdOc < Formula
 
     # ENABLE_SIM=OFF: disable the MPMD software simulator. It pulls in
     # `host/python/simulator/setup.py` which imports setuptools (not in
-    # python3's default venv per PEP 632), AND it causes `libuhd`
+    # python's default venv per PEP 632), AND it causes `libuhd`
     # itself to link against the Python framework via
     # `UHD_LIB_ADD_PYTHON(uhd)` in host/lib/CMakeLists.txt -- which
     # `brew audit` flags as a framework-link violation. The simulator
@@ -127,7 +142,7 @@ class UhdOc < Formula
 
       Verify the overclock build:
 
-        uhd_config_info --version # should print "4.9.0.1-oc"
+        uhd_config_info --version # should print "#{version}-oc"
     EOS
   end
 
@@ -232,7 +247,7 @@ __END__
 -    _setup_rx_fir(num_rx_taps, _rfir_factor);
 +    if (_tfir_factor != 0) {_setup_tx_fir(num_tx_taps, _tfir_factor);}
 +    if (_rfir_factor != 0) {_setup_rx_fir(num_rx_taps, _rfir_factor);}
- 
+
      return _baseband_bw;
  }
 @@ -1857,7 +1870,7 @@
