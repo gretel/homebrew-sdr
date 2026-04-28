@@ -17,6 +17,7 @@ class Soapyuhd < Formula
   version "0.4.2"
   sha256 "a28c38123d9b96d54834acab54a839372bbb1ba456bfa34233bfad079333c170"
   license "GPL-3.0-or-later"
+  revision 1
 
   head "https://github.com/pothosware/SoapyUHD.git", branch: "master"
 
@@ -64,19 +65,6 @@ class Soapyuhd < Formula
     inreplace "SoapyUHDDevice.cpp",
               "#include <iostream>",
               "#include <iostream>\n#include <boost/lexical_cast.hpp>"
-
-    # UHD 4.10 regressed `device::find` such that any device-address
-    # argument containing the `serial` key (even an empty value)
-    # returns zero matches. SoapySDR's enumerate-then-make path always
-    # injects the discovered serial before calling SoapyUHD's
-    # makeDevice, which then calls `multi_usrp::make` -> `device::find`
-    # and gets nothing -> "LookupError: KeyError: No devices found".
-    # Strip the `serial` key before forwarding kwargs to UHD. Lose
-    # multi-device disambiguation by serial; gain a working device
-    # open. Remove once upstream UHD's serial filter is fixed.
-    inreplace "TypeHelpers.hpp",
-              "        addr[it->first] = it->second;",
-              "        if (it->first != \"serial\") addr[it->first] = it->second;"
 
     boost = Formula["boost"]
     args = std_cmake_args + %W[
