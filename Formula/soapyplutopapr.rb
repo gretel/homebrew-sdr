@@ -1,22 +1,24 @@
 # typed: false
 # frozen_string_literal: true
 
-# SoapySDR plugin for PlutoSDR with extended Tezuka streaming formats
-# (CS12, CS8, PAPR modes). Forked from F5OEO/SoapyPlutoPAPR; we re-brand
-# the in-tree "tezuka" naming to "papr" via inreplace at install time
-# so the SoapySDR module registers as "plutoPAPR" rather than "tezuka",
-# disambiguating from any other "tezuka"-named SoapySDR modules.
+# SoapySDR plugin for PlutoSDR with extended PAPR streaming formats
+# (CS12, CS8, PAPR modes).  Tracks the gretel/SoapyPlutoPAPR fork of
+# F5OEO/SoapyPlutoPAPR, which commits the "tezuka" -> "plutoPAPR"
+# rebrand at source level (no inreplace needed) and adds the
+# ad9361_set_bb_rate-before-FPGA-data-port-rate ordering fix that
+# unbreaks sample rates below the AD9361 native FIR-bypass minimum.
 class Soapyplutopapr < Formula
-  desc "SoapySDR plugin for PlutoSDR with extended Tezuka/PAPR streaming formats"
-  homepage "https://github.com/F5OEO/SoapyPlutoPAPR"
-  # Pinned to commit ec1c92d (post-0.2.1, includes the CS8/CS16 fixes
-  # and the upstream "tezuka" rename). Upstream has not tagged this
-  # commit; we synthesise a version string from the commit date.
-  url "https://github.com/F5OEO/SoapyPlutoPAPR.git",
-      revision: "ec1c92dbef83631657fd58f49f2d0e363d4394c0"
-  version "0.2.1+git.20250605"
+  desc "SoapySDR plugin for PlutoSDR with extended PAPR streaming formats"
+  homepage "https://github.com/gretel/SoapyPlutoPAPR"
+  # Pinned to the head of feature/plutoPAPR, which carries:
+  #   - ec1c92d  Change Name for tezuka specific features (F5OEO)
+  #   - cee0631  rename: tezuka -> plutoPAPR (CMake, registry, kwarg)
+  #   - 238fba5  fix(settings): ad9361_set_bb_rate before FPGA rate
+  url "https://github.com/gretel/SoapyPlutoPAPR.git",
+      revision: "238fba5b6b49155188c2733ac3a3fe78703ebf47"
+  version "0.2.2+git.20260420"
   license "LGPL-2.1-or-later"
-  head "https://github.com/F5OEO/SoapyPlutoPAPR.git", branch: "master"
+  head "https://github.com/gretel/SoapyPlutoPAPR.git", branch: "feature/plutoPAPR"
 
   depends_on "cmake" => :build
   depends_on "libad9361-iio"
@@ -25,30 +27,6 @@ class Soapyplutopapr < Formula
   depends_on "soapysdr"
 
   def install
-    # Rename the upstream "tezuka" branding to "papr". These are
-    # Homebrew-only renames that disambiguate the SoapySDR module name
-    # and the per-device kwarg key. We do this via inreplace rather
-    # than a patch because the change is purely cosmetic and won't be
-    # accepted upstream.
-    if File.read("CMakeLists.txt").include?("TezukaSupport")
-      inreplace "CMakeLists.txt", "TARGET TezukaSupport", "TARGET PlutoPAPRSupport"
-    end
-
-    if File.read("PlutoSDR_Registration.cpp").include?("tezuka")
-      inreplace "PlutoSDR_Registration.cpp" do |s|
-        s.gsub! 'args.count("tezuka_format")', 'args.count("papr_format")'
-        s.gsub! 'options["tezuka_format"]=args.at("tezuka_format")',
-                'options["papr_format"]=args.at("papr_format")'
-        s.gsub! 'register_plutosdr("tezuka",', 'register_plutosdr("plutoPAPR",'
-      end
-    end
-
-    if File.read("PlutoSDR_Settings.cpp").include?("tezuka_format")
-      inreplace "PlutoSDR_Settings.cpp",
-                'args.count("tezuka_format") != 0) && strncmp(args.at("tezuka_format")',
-                'args.count("papr_format") != 0) && strncmp(args.at("papr_format")'
-    end
-
     args = %W[
       -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       -DSoapySDR_DIR=#{Formula["soapysdr"].opt_lib}/cmake/SoapySDR
