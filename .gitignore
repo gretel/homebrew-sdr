@@ -12,3 +12,6 @@
 # but defensively ignore)
 build/
 *.bottle*
+
+# Local scratch dir
+tmp/
