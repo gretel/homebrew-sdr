@@ -39,12 +39,6 @@ officially supported sample rates. The overclock patch is from
 [MothMaux/uhd-oc](https://github.com/MothMaux/uhd-oc) and is
 applied at build time; no FPGA or firmware changes.
 
-Also patched to fix UHD 4.10's `serial_numbers_match` regression
-(`std::stoi` base-16 parse throws on non-hex serials, locking
-out USRP clones whose USB serial isn't pure hex). The patch
-falls back to case-insensitive string equality on non-hex
-serials. See [issue #919](https://github.com/EttusResearch/uhd/issues/919).
-
 **Conflicts with the stock `uhd` formula** — you must
 `brew uninstall uhd` first.
 

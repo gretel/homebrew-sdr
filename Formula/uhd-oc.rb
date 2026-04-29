@@ -24,8 +24,8 @@ class UhdOc < Formula
     "BSD-3-Clause",
     "Apache-2.0",
   ]
-  compatibility_version 1
   revision 1
+  compatibility_version 1
   head "https://github.com/EttusResearch/uhd.git", branch: "master"
 
   livecheck do
@@ -87,17 +87,6 @@ class UhdOc < Formula
   #            AD9361 spec, not validated by Analog Devices or Ettus.
   #            Reportedly stable up to ~100 MS/s; degraded above.
   patch :DATA
-
-  # serial_numbers_match: fall back to case-insensitive string equality on
-  # non-hex serials. UHD 4.10's device::find gates on this helper, which
-  # std::stoi-parses as base 16 and returns false on any character outside
-  # [0-9a-fA-F] -- locking out USRP clones whose USB serial isn't pure hex
-  # (e.g. LibreSDR B220 Mini reporting 'ZPTP4PO'). Upstream issue:
-  # https://github.com/EttusResearch/uhd/issues/919
-  patch do
-    url "https://github.com/gretel/uhd/commit/1159f5e58f336aa4cf932f5898d5705f5b140669.patch"
-    sha256 "0a3fc3b5d7c586a5e1afb38919ff037362ec2c526690b3f04f5e11890cefe9e1"
-  end
 
   def python3
     "python3.14"
