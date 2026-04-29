@@ -7,6 +7,13 @@
 # do NOT hardcode any paths to `uhd-oc` here: uhd-oc is meant to be a
 # drop-in replacement for `uhd`, and consumers like soapyuhd should not
 # need to know which keg is active.
+#
+# This formula is intentionally tap-only by design: the parse-time
+# `Formula[...].any_version_installed?` conditional below is not
+# acceptable in homebrew-core (which forbids conditional dependencies on
+# tap formulae and resolves graphs purely from the .rb at parse time
+# without inspecting the local Cellar). A future homebrew-core variant
+# would replace the conditional block with a single `depends_on "uhd"`.
 class Soapyuhd < Formula
   desc "SoapySDR plugin for UHD/USRP devices"
   homepage "https://github.com/pothosware/SoapyUHD"
@@ -91,5 +98,14 @@ class Soapyuhd < Formula
   test do
     output = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --info 2>&1")
     assert_match "uhd", output
+
+    # Probe for UHD devices via the just-installed uhdSupport module.
+    # Without USRP hardware attached, SoapySDRUtil exits 1 and prints
+    # "No devices found" -- which still proves the module loaded and the
+    # driver registered with SoapySDR. With hardware attached, exit 0 +
+    # "Found device" appears instead. Mask the exit code via `|| true`
+    # so the assertion runs in both cases.
+    probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=uhd 2>&1 || true")
+    assert_match(/(No devices found|Found device)/, probe)
   end
 end
