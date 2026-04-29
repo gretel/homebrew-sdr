@@ -15,7 +15,12 @@ class Libiio < Formula
   livecheck do
     url :stable
     strategy :github_latest
-    regex(/^v?(0(?:\.\d+)+)$/i)
+    # Match any vX.Y.Z tag. libiio's `main` branch is project(VERSION 1.0)
+    # with no v1.x tag yet (last tagged release: v0.26). When v1.x ships,
+    # livecheck will flag this formula -- the v1.x ABI is an
+    # API-incompatible rewrite, so the bump requires a manual review of
+    # consumers (libad9361-iio, gr-iio, SoapyPlutoSDR) before applying.
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   depends_on "cmake" => :build
@@ -37,9 +42,10 @@ class Libiio < Formula
       -DWITH_XML_BACKEND=ON
     ]
 
-    # libiio v0.26 declares cmake_minimum_required(VERSION 2.8.7) which
-    # CMake 4 no longer accepts. Pass the compatibility flag.
-    # Upstream tracking: https://github.com/analogdevicesinc/libiio/issues
+    # libiio v0.26 declares cmake_minimum_required(VERSION 2.8.7); CMake 4
+    # dropped support for policies below 3.5, so pass the compatibility
+    # floor. The libiio v1.x rewrite on main raises this to 3.10 and the
+    # workaround can be dropped once we move to a v1.x tagged release.
     args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
