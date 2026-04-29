@@ -30,7 +30,7 @@ development boards. Handles baseband rate setup, filter
 programming, and other AD9361-specific configuration that plain
 `libiio` can't do.
 
-### [`uhd-oc`](https://github.com/EttusResearch/uhd) — 4.9.0.1-oc
+### [`uhd-oc`](https://github.com/EttusResearch/uhd) — 4.10.0.0-oc
 
 Ettus UHD — the driver suite for USRP radios — patched to raise
 the internal AD9361 clock ceiling from 61.44 MS/s to 122.88 MS/s.
@@ -39,10 +39,16 @@ officially supported sample rates. The overclock patch is from
 [MothMaux/uhd-oc](https://github.com/MothMaux/uhd-oc) and is
 applied at build time; no FPGA or firmware changes.
 
+Also patched to fix UHD 4.10's `serial_numbers_match` regression
+(`std::stoi` base-16 parse throws on non-hex serials, locking
+out USRP clones whose USB serial isn't pure hex). The patch
+falls back to case-insensitive string equality on non-hex
+serials. See [issue #919](https://github.com/EttusResearch/uhd/issues/919).
+
 **Conflicts with the stock `uhd` formula** — you must
 `brew uninstall uhd` first.
 
-### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.1+git
+### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.2+git.20260420
 
 *Depends on: `libiio`, `libad9361-iio`*
 
@@ -53,7 +59,7 @@ CS12 streaming sample formats on top of the usual float32 — useful
 when USB bandwidth becomes the bottleneck at high sample rates, or
 when passing samples through a gateway that prefers fixed-point.
 
-### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.1
+### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.2
 
 *Depends on: `uhd-oc` (or stock `uhd`)*
 
