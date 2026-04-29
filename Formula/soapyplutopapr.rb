@@ -20,6 +20,16 @@ class Soapyplutopapr < Formula
   license "LGPL-2.1-or-later"
   head "https://github.com/gretel/SoapyPlutoPAPR.git", branch: "feature/plutoPAPR"
 
+  livecheck do
+    # Tracked branch is gretel/SoapyPlutoPAPR feature/plutoPAPR (a fork
+    # of F5OEO/SoapyPlutoPAPR). Upstream tags follow `soapy-plutosdr-*`,
+    # which neither the fork name nor the version string matches; auto
+    # bump would always report the fork as out-of-date against the
+    # upstream tag. Bump manually when the fork is rebased onto a new
+    # F5OEO baseline.
+    skip "fork-tracked: gretel/SoapyPlutoPAPR feature/plutoPAPR"
+  end
+
   depends_on "cmake" => :build
   depends_on "libad9361-iio"
   depends_on "libiio"
@@ -42,7 +52,11 @@ class Soapyplutopapr < Formula
     assert_match "Module", output
     assert_match "Soapy", output
 
-    probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=plutoPAPR 2>&1")
+    # SoapySDRUtil --find exits 1 when no devices match; mask with `|| true`
+    # so the assertion runs regardless of exit code. The driver loaded
+    # successfully if it reports either "No devices found" (no hardware
+    # attached) or "Found device" (hardware attached).
+    probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=plutoPAPR 2>&1 || true")
     assert_match(/(No devices found|Found device)/, probe)
   end
 end
