@@ -21,26 +21,20 @@ class Libad9361Iio < Formula
   depends_on "libiio"
 
   def install
-    # libad9361-iio v0.3 hardcodes `FRAMEWORK TRUE` on the ad9361 target
-    # which forces a macOS framework bundle instead of a traditional
-    # header+dylib install layout. Remove the property so headers land
-    # in #{include} and the dylib lands in #{lib}.
-    # Upstream issue: https://github.com/analogdevicesinc/libad9361-iio/issues
-    if OS.mac?
-      inreplace "CMakeLists.txt", "\tFRAMEWORK TRUE\n", ""
-    end
+    # libad9361-iio v0.3 hardcodes `FRAMEWORK TRUE` on the ad9361 target,
+    # forcing a macOS framework bundle instead of the traditional
+    # header+dylib install layout. Strip the property so headers land in
+    # #{include} and the dylib lands in #{lib}. Homebrew-only build-system
+    # patch -- not relevant upstream.
+    inreplace "CMakeLists.txt", "\tFRAMEWORK TRUE\n", "" if OS.mac?
 
-    # libad9361 v0.3 uses cmake_minimum_required(VERSION 2.8.12) which
-    # CMake 4 no longer accepts. Pass the policy compatibility flag.
-    #
-    # libad9361 locates libiio via find_library/find_path -- point at the
-    # Homebrew prefix explicitly so it doesn't pick up a system copy.
-    args = %W[
+    # libad9361 v0.3 uses cmake_minimum_required(VERSION 2.8.12); CMake 4
+    # dropped support for policies below 3.5, so pass the compatibility
+    # floor. libiio is found via the Homebrew superenv CMAKE_PREFIX_PATH.
+    args = %w[
       -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       -DOSX_PACKAGE=OFF
       -DPYTHON_BINDINGS=OFF
-      -DLIBIIO_LIBRARIES=#{Formula["libiio"].opt_lib}/#{shared_library("libiio")}
-      -DLIBIIO_INCLUDEDIR=#{Formula["libiio"].opt_include}
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
