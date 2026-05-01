@@ -17,19 +17,20 @@
 class Soapyuhd < Formula
   desc "SoapySDR plugin for UHD/USRP devices"
   homepage "https://github.com/pothosware/SoapyUHD"
-  # Track master past 0.4.1 to pick up post_output_action() stub in
-  # UHDSoapyDevice.cpp -- needed to compile soapySupport against UHD
-  # 4.x's pure-virtual added in uhd/stream.hpp.
-  url "https://github.com/pothosware/SoapyUHD/archive/2a5d381f68fd05d5b3c0e7db56c36892ea99b4ae.tar.gz"
+  # Pinned to gretel/SoapyUHD master, which carries fork-specific
+  # modernization (UHD 4.10 compat, C++20, Boost-free, target-scoped
+  # CMake) while upstream pothosware reviews the equivalent PRs. The
+  # fork itself does not issue releases; we track upstream's last
+  # version label and bump `revision` for fork patch updates.
+  url "https://github.com/gretel/SoapyUHD/archive/87547481d4fedc21841891812f1a703eabd0c6ae.tar.gz"
   version "0.4.2"
-  sha256 "a28c38123d9b96d54834acab54a839372bbb1ba456bfa34233bfad079333c170"
+  sha256 "04a69f135140789b6174806a193d34025d8af09b782b3103fc5fcca087d9eb54"
   license "GPL-3.0-or-later"
-  revision 1
+  revision 2
 
-  head "https://github.com/pothosware/SoapyUHD.git", branch: "master"
+  head "https://github.com/gretel/SoapyUHD.git", branch: "master"
 
   depends_on "cmake" => :build
-  depends_on "boost"
   depends_on "soapysdr"
 
   # Parse-time conditional: prefer the overclocked uhd-oc keg if the
@@ -48,51 +49,30 @@ class Soapyuhd < Formula
   end
 
   def install
-    # SoapyUHD's CMakeLists.txt uses `cmake_minimum_required(VERSION
-    # 2.8.12...3.10)` which CMake 4 no longer accepts -- pass the
-    # compatibility flag.
+    # The fork removed the need for inreplace patches the previous
+    # formula carried (CMAKE_CXX_STANDARD bump, explicit
+    # <boost/lexical_cast.hpp> include, -DCMAKE_POLICY_VERSION_MINIMUM=3.5).
+    # cmake_minimum is now 3.10..3.30 in the fork and Boost is no
+    # longer linked.
     #
-    # No UHD_DIR / UHD_INCLUDE_DIRS / UHD_LIBRARIES overrides: the
-    # active uhd / uhd-oc keg is on CMAKE_PREFIX_PATH automatically via
-    # Homebrew's superenv, so `find_package(UHD NO_MODULE)` resolves
-    # against `<keg>/lib/cmake/uhd/UHDConfig.cmake` directly.
+    # No UHD_DIR override: the active uhd / uhd-oc keg is on
+    # CMAKE_PREFIX_PATH via Homebrew's superenv, so
+    # `find_package(UHD NO_MODULE)` resolves against
+    # `<keg>/lib/cmake/uhd/UHDConfig.cmake` directly.
+    #
+    # BUILD_SOAPY_SUPPORT=OFF: the soapySupport target (UHD<-Soapy)
+    # would install into ${UHD_ROOT}/lib/uhd/modules outside our keg
+    # sandbox, writing into the uhd / uhd-oc keg. SoapySDR consumers
+    # only need uhdSupport (Soapy<-UHD).
 
-    # UHD 4.10 headers use C++17 features (`std::optional`,
-    # `std::is_same_v`, etc.). SoapyUHD master pins
-    # `CMAKE_CXX_STANDARD 14` which can't include UHD's headers
-    # cleanly. Bump the standard to 17.
-    inreplace "CMakeLists.txt",
-              "set(CMAKE_CXX_STANDARD 14)",
-              "set(CMAKE_CXX_STANDARD 17)"
-
-    # SoapyUHDDevice.cpp uses `boost::lexical_cast` but relies on a
-    # transitive include from another Boost header that newer Boost
-    # versions no longer pull in. Add the explicit include alongside
-    # the other system headers.
-    inreplace "SoapyUHDDevice.cpp",
-              "#include <iostream>",
-              "#include <iostream>\n#include <boost/lexical_cast.hpp>"
-
-    boost = Formula["boost"]
     args = std_cmake_args + %W[
-      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       -DSoapySDR_DIR=#{Formula["soapysdr"].opt_lib}/cmake/SoapySDR
-      -DBOOST_ROOT=#{boost.opt_prefix}
-      -DBoost_NO_SYSTEM_PATHS=ON
-      -DBoost_NO_BOOST_CMAKE=OFF
-      -DCMAKE_POLICY_DEFAULT_CMP0167=NEW
+      -DBUILD_SOAPY_SUPPORT=OFF
     ]
 
-    # Only build `uhdSupport` (Soapy<-UHD direction). The `soapySupport`
-    # target (UHD<-Soapy) installs into ${UHD_ROOT}/lib/uhd/modules,
-    # which is outside our Homebrew sandbox -- it would write into the
-    # uhd / uhd-oc keg. SoapySDR consumers only need uhdSupport.
     system "cmake", "-S", ".", "-B", "build", *args
-    system "cmake", "--build", "build", "--target", "uhdSupport"
-
-    # SOAPY_SDR_MODULE_UTIL produces `libuhdSupport.so` on macOS too
-    # (SoapySDR forces .so suffix for cross-platform module loading).
-    (lib/"SoapySDR/modules0.8").install "build/libuhdSupport.so"
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
