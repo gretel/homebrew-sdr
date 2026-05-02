@@ -37,55 +37,16 @@ between `uhd` and `uhd-oc` requires reinstalling every consumer:
 brew reinstall gretel/sdr/soapyuhd gnuradio
 ```
 
-## Stable = upstream, `--HEAD` = gretel fork
+## `--HEAD` builds
 
-For fork-tracked formulae **where the gretel fork is a strict
-superset of upstream** (no driver-name rebrand, no rename in CMake
-target / install layout, no test-contract divergence), this tap
-uses the following dual-source convention:
-
-- Default `brew install gretel/sdr/<formula>` builds the original
-  upstream pinned by SHA — reproducible, useful as a known baseline
-  for A/B comparisons against the fork.
-- `brew install --HEAD gretel/sdr/<formula>` builds the gretel fork
-  from its tracked branch tip, with whatever fork-only patches the
-  fork carries.
-
-Implemented with the `stable do` / `head do` block split:
-
-```ruby
-stable do
-  url "https://github.com/<upstream>/<repo>/archive/<sha>.tar.gz"
-  sha256 "..."
-  # upstream-only deps and patches go here
-end
-
-head do
-  url "https://github.com/gretel/<repo>.git", branch: "<fork-branch>"
-end
-```
-
-Currently used by: [`soapyuhd`](#soapyuhd) (default = pothosware
-master pin, `--HEAD` = `gretel/SoapyUHD master`).
-
-**Where the pattern does NOT apply:**
-
-- The formula's identity *is* the fork (e.g. [`uhd-oc`](#uhd-oc) —
-  the overclock patch defines the formula; without it, the formula
-  collapses into stock `uhd`).
-- The fork rebrands the driver name, CMake target, or install path
-  (e.g. [`soapyplutopapr`](#soapyplutopapr) — the
-  `tezuka` → `plutoPAPR` rename means the F5OEO upstream registers
-  a different SoapySDR driver and breaks the formula's test
-  contract).
-- No upstream fork relationship exists ([`libiio`](#libiio),
-  [`libad9361-iio`](#libad9361-iio) — pinned to upstream tags
-  directly).
-
-When adding a new fork-tracked formula, document the choice
-explicitly: either follow the dual-source pattern above (and
-mention it in the formula entry below), or call out why it doesn't
-apply.
+Some fork-tracked formulae split their source via `stable do` /
+`head do`: default `brew install` builds the upstream pinned by
+SHA (reproducible baseline), `--HEAD` builds the gretel fork tip.
+Used only when the fork is a strict superset of upstream — same
+driver name, same CMake target, same install layout. Currently:
+[`soapyuhd`](#soapyuhd). Does not apply where the formula's
+identity *is* the patch ([`uhd-oc`](#uhd-oc)) or the fork rebrands
+the driver/target ([`soapyplutopapr`](#soapyplutopapr)).
 
 ## Formulae
 
@@ -151,34 +112,19 @@ The gretel fork carries the `tezuka` -> `plutoPAPR` rename and the
 
 ### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.2
 
-**Stable (default):**
+**Pinned:**
 [`pothosware/SoapyUHD` @ 2a5d381](https://github.com/pothosware/SoapyUHD/commit/2a5d381f68fd05d5b3c0e7db56c36892ea99b4ae)
-on branch [`master`](https://github.com/pothosware/SoapyUHD/tree/master)
+(default), [`gretel/SoapyUHD` master](https://github.com/gretel/SoapyUHD/tree/master)
+(`--HEAD`)
 
-**`--HEAD`:**
-[`gretel/SoapyUHD` master tip](https://github.com/gretel/SoapyUHD/tree/master)
-(fork of [`pothosware/SoapyUHD`](https://github.com/pothosware/SoapyUHD))
+*Depends on: `uhd-oc` (or stock `uhd`); `boost` (default only)*
 
-*Depends on: `uhd-oc` (or stock `uhd`); `boost` (stable only)*
+SoapySDR plugin that exposes UHD/USRP devices to any SoapySDR
+consumer (GNU Radio, CubicSDR, SDRangel). Works with either stock
+`uhd` or `gretel/sdr/uhd-oc` — install whichever first.
 
-SoapySDR plugin that exposes UHD/USRP devices through the SoapySDR
-abstraction layer, making them available to any tool that uses
-SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.). Works with either
-stock `uhd` or `gretel/sdr/uhd-oc` — install whichever is present
-before installing this formula.
-
-Follows the [stable=upstream / `--HEAD`=fork](#stable--upstream---head--gretel-fork)
-convention. The default install builds pothosware upstream pinned
-by SHA (pre-fork baseline, useful for reproducible A/B comparisons
-against the gretel patches — e.g. testing the state before
-[gretel `76f6923`](https://github.com/gretel/SoapyUHD/commit/76f6923f4a2f3d1c92171d03b2b2b81022b35185)
-"cache stream channel count in hot read/write path"). The
-`--HEAD` install builds the gretel fork master tip with UHD 4.10
-compatibility, C++20, Boost-free linkage, target-scoped CMake, and
-a `BUILD_SOAPY_SUPPORT` toggle that upstream pothosware has not
-yet merged.
-
-```bash
-brew install gretel/sdr/soapyuhd            # pothosware baseline
-brew install --HEAD gretel/sdr/soapyuhd     # gretel fork
-```
+Default install is the pothosware upstream pinned by SHA — the
+pre-fork baseline. `--HEAD` is the gretel fork (UHD 4.10, C++20,
+Boost-free, `BUILD_SOAPY_SUPPORT` toggle); use it to A/B against
+upstream, e.g. with or without
+[gretel `76f6923`](https://github.com/gretel/SoapyUHD/commit/76f6923f4a2f3d1c92171d03b2b2b81022b35185).
