@@ -39,7 +39,13 @@ brew reinstall gretel/sdr/soapyuhd gnuradio
 
 ## Formulae
 
+Each entry below lists the exact upstream pin (tag or commit). For
+fork-tracked formulae the gretel fork is the canonical install
+source and the original upstream is noted for reference.
+
 ### [`libiio`](https://github.com/analogdevicesinc/libiio) — 0.26
+
+**Pinned:** [`analogdevicesinc/libiio` v0.26](https://github.com/analogdevicesinc/libiio/releases/tag/v0.26)
 
 Analog Devices' C library for reading and writing Linux IIO
 (Industrial I/O) devices: ADCs, DACs, sensors, and RF transceivers
@@ -48,6 +54,8 @@ foundation for talking to any ADI hardware from userspace — over
 USB, over the network, or against a local sysfs tree.
 
 ### [`libad9361-iio`](https://github.com/analogdevicesinc/libad9361-iio) — 0.3
+
+**Pinned:** [`analogdevicesinc/libad9361-iio` v0.3](https://github.com/analogdevicesinc/libad9361-iio/releases/tag/v0.3)
 
 *Depends on: `libiio`*
 
@@ -59,17 +67,26 @@ programming, and other AD9361-specific configuration that plain
 
 ### [`uhd-oc`](https://github.com/EttusResearch/uhd) — 4.10.0.0-oc
 
+**Pinned:**
+[`EttusResearch/uhd` v4.10.0.0](https://github.com/EttusResearch/uhd/releases/tag/v4.10.0.0)
++ overclock patch from
+[`MothMaux/uhd-oc` @ 4c3086d](https://github.com/MothMaux/uhd-oc/commit/4c3086d)
+
 Ettus UHD — the driver suite for USRP radios — patched to raise
 the internal AD9361 clock ceiling from 61.44 MS/s to 122.88 MS/s.
 Used with B200, B210, and B220 devices to push beyond the
-officially supported sample rates. The overclock patch is from
-[MothMaux/uhd-oc](https://github.com/MothMaux/uhd-oc) and is
-applied at build time; no FPGA or firmware changes.
+officially supported sample rates. The overclock patch is applied
+at build time; no FPGA or firmware changes.
 
 **Conflicts with the stock `uhd` formula** — you must
 `brew uninstall uhd` first.
 
-### [`soapyplutopapr`](https://github.com/F5OEO/SoapyPlutoPAPR) — 0.2.2+git.20260420
+### [`soapyplutopapr`](https://github.com/gretel/SoapyPlutoPAPR) — 0.2.2+git.20260420
+
+**Pinned:**
+[`gretel/SoapyPlutoPAPR` @ 238fba5](https://github.com/gretel/SoapyPlutoPAPR/commit/238fba5b6b49155188c2733ac3a3fe78703ebf47)
+on branch [`feature/plutoPAPR`](https://github.com/gretel/SoapyPlutoPAPR/tree/feature/plutoPAPR)
+(fork of [`F5OEO/SoapyPlutoPAPR`](https://github.com/F5OEO/SoapyPlutoPAPR))
 
 *Depends on: `libiio`, `libad9361-iio`*
 
@@ -79,13 +96,22 @@ similar tools. This fork of the upstream Pluto plugin adds CS8 and
 CS12 streaming sample formats on top of the usual float32 — useful
 when USB bandwidth becomes the bottleneck at high sample rates, or
 when passing samples through a gateway that prefers fixed-point.
+The gretel fork carries the `tezuka` -> `plutoPAPR` rename and the
+`ad9361_set_bb_rate`-before-FPGA-rate ordering fix.
 
-### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.2
+### [`soapyuhd`](https://github.com/gretel/SoapyUHD) — 0.4.2
+
+**Pinned:**
+[`gretel/SoapyUHD` @ 8754748](https://github.com/gretel/SoapyUHD/commit/87547481d4fedc21841891812f1a703eabd0c6ae)
+on branch [`master`](https://github.com/gretel/SoapyUHD/tree/master)
+(fork of [`pothosware/SoapyUHD`](https://github.com/pothosware/SoapyUHD))
 
 *Depends on: `uhd-oc` (or stock `uhd`)*
 
-SoapySDR plugin that exposes UHD/USRP devices through the
-SoapySDR abstraction layer, making them available to any tool
-that uses SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.).
-Works with either stock `uhd` or `gretel/sdr/uhd-oc` — install
-whichever is present before installing this formula.
+SoapySDR plugin that exposes UHD/USRP devices through the SoapySDR
+abstraction layer, making them available to any tool that uses
+SoapySDR (GNU Radio, CubicSDR, SDRangel, etc.). Works with either
+stock `uhd` or `gretel/sdr/uhd-oc` — install whichever is present
+before installing this formula. The gretel fork carries UHD 4.10
+compatibility, C++20, Boost-free linkage, and target-scoped CMake
+that upstream pothosware has not yet merged.
