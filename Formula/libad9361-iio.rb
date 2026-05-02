@@ -20,6 +20,13 @@ class Libad9361Iio < Formula
   depends_on "cmake" => :build
   depends_on "libiio"
 
+  # Pothos tap ships an identically-named formula. Both install
+  # `lib/libad9361.dylib`, `include/ad9361.h`, and the matching .pc --
+  # `brew link` would refuse on file collision. Declare explicitly so
+  # the user gets a clear error instead of a cryptic link failure.
+  conflicts_with "pothosware/pothos/libad9361-iio",
+    because: "both install libad9361 headers and libraries"
+
   def install
     # libad9361-iio v0.3 hardcodes `FRAMEWORK TRUE` on the ad9361 target,
     # forcing a macOS framework bundle instead of the traditional
