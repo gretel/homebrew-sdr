@@ -144,6 +144,13 @@ class UhdOc < Formula
       Verify the overclock build:
 
         uhd_config_info --version # should print "#{version}-oc"
+
+      Consumers of libuhd (soapyuhd, gnuradio, etc.) bake an RPATH to
+      the keg they were built against. Switching between `uhd` and
+      `uhd-oc` requires reinstalling those consumers or `dlopen` will
+      fail at runtime:
+
+        brew reinstall gretel/sdr/soapyuhd gnuradio
     EOS
   end
 
