@@ -37,17 +37,6 @@ between `uhd` and `uhd-oc` requires reinstalling every consumer:
 brew reinstall gretel/sdr/soapyuhd gnuradio
 ```
 
-## `--HEAD` builds
-
-Some fork-tracked formulae split their source via `stable do` /
-`head do`: default `brew install` builds the upstream pinned by
-SHA (reproducible baseline), `--HEAD` builds the gretel fork tip.
-Used only when the fork is a strict superset of upstream — same
-driver name, same CMake target, same install layout. Currently:
-[`soapyuhd`](#soapyuhd). Does not apply where the formula's
-identity *is* the patch ([`uhd-oc`](#uhd-oc)) or the fork rebrands
-the driver/target ([`soapyplutopapr`](#soapyplutopapr)).
-
 ## Formulae
 
 Each entry below lists the exact upstream pin (tag or commit). For
