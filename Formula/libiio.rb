@@ -29,6 +29,13 @@ class Libiio < Formula
 
   uses_from_macos "libxml2"
 
+  # Pothos tap ships an identically-named formula. Both install
+  # `lib/libiio.dylib`, `include/iio.h`, `lib/pkgconfig/libiio.pc` --
+  # `brew link` would refuse on file collision. Declare explicitly so
+  # the user gets a clear error instead of a cryptic link failure.
+  conflicts_with "pothosware/pothos/libiio",
+    because: "both install libiio headers and libraries"
+
   def install
     args = %w[
       -DOSX_FRAMEWORK=OFF
