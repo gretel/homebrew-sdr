@@ -75,6 +75,21 @@ class Soapyuhd < Formula
     system "cmake", "--install", "build"
   end
 
+  def caveats
+    <<~EOS
+      soapyuhd links against whichever uhd keg was active at build time
+      (stock `uhd` or `gretel/sdr/uhd-oc`). The RPATH is baked into the
+      uhdSupport plugin and points at that specific keg's lib dir.
+
+      After switching between `uhd` and `uhd-oc` you MUST rebuild
+      soapyuhd or its plugin will fail to dlopen libuhd:
+
+        brew reinstall gretel/sdr/soapyuhd
+
+      Same applies to any other consumer of libuhd (gnuradio, etc.).
+    EOS
+  end
+
   test do
     output = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --info 2>&1")
     assert_match "uhd", output
