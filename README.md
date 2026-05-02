@@ -10,6 +10,33 @@ brew tap gretel/sdr
 
 Formulae are then available as `gretel/sdr/<formula>`.
 
+## Drop-in replacement policy
+
+Every formula in this tap is intended as a drop-in replacement for
+its homebrew-core or `pothosware/pothos` counterpart. Same formula
+names, same install layout (headers, libs, `.pc`, `.cmake`), same
+plugin paths — so existing consumers (GNU Radio, SoapySDR utils,
+SDRangel) keep working without reconfiguration.
+
+Where two kegs would collide, the replacement is declared with
+`conflicts_with` so `brew` refuses cleanly instead of failing at
+link time. Switching between stock and this tap therefore looks
+like:
+
+```bash
+brew uninstall <stock>; brew install gretel/sdr/<replacement>
+```
+
+**RPATH caveat:** consumers of `libuhd` (e.g. `soapyuhd`,
+`gnuradio`) bake the absolute Cellar path of the keg they were
+built against into their RPATH. Two formulae cannot share a Cellar
+directory (`Cellar/uhd/...` vs `Cellar/uhd-oc/...`), so switching
+between `uhd` and `uhd-oc` requires reinstalling every consumer:
+
+```bash
+brew reinstall gretel/sdr/soapyuhd gnuradio
+```
+
 ## Formulae
 
 ### [`libiio`](https://github.com/analogdevicesinc/libiio) — 0.26
