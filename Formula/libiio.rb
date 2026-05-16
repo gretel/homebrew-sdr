@@ -58,6 +58,12 @@ class Libiio < Formula
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
+
+    # Framework compat shim for libiio-sys Rust crate
+    # build.rs hardcodes -framework iio on macOS (not pkg-config).
+    # Remove when upstream adopts pkg-config.
+    (frameworks/"iio.framework").mkpath
+    ln_sf lib/shared_library("libiio"), frameworks/"iio.framework/iio"
   end
 
   test do
