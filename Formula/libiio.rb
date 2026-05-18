@@ -49,6 +49,11 @@ class Libiio < Formula
       -DWITH_XML_BACKEND=ON
     ]
 
+    # Enable compat mode when building from HEAD (v1.x rewrite on main)
+    # so API consumers expecting v0.26 keep working. Stable v0.26 is the
+    # baseline and has no compat flag.
+    args << "-DLIBIIO_COMPAT=ON" if build.head?
+
     # libiio v0.26 declares cmake_minimum_required(VERSION 2.8.7); CMake 4
     # dropped support for policies below 3.5, so pass the compatibility
     # floor. The libiio v1.x rewrite on main raises this to 3.10 and the
