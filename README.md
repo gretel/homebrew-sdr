@@ -53,9 +53,9 @@ that expose themselves through the kernel IIO subsystem. The
 foundation for talking to any ADI hardware from userspace — over
 USB, over the network, or against a local sysfs tree.
 
-### [`libad9361-iio`](https://github.com/analogdevicesinc/libad9361-iio) — 0.3
+### [`libad9361-iio`](https://github.com/analogdevicesinc/libad9361-iio) — 0.4.0
 
-**Pinned:** [`analogdevicesinc/libad9361-iio` v0.3](https://github.com/analogdevicesinc/libad9361-iio/releases/tag/v0.3)
+**Pinned:** [`analogdevicesinc/libad9361-iio` v0.4.0](https://github.com/analogdevicesinc/libad9361-iio/releases/tag/v0.4.0)
 
 *Depends on: `libiio`*
 
@@ -81,23 +81,23 @@ at build time; no FPGA or firmware changes.
 **Conflicts with the stock `uhd` formula** — you must
 `brew uninstall uhd` first.
 
-### [`soapyplutopapr`](https://github.com/gretel/SoapyPlutoPAPR) — 0.2.2+git.20260420
+### [`soapyplutopapr`](https://github.com/gretel/SoapyPlutoPAPR) — 0.2.2+git.20260610
 
 **Pinned:**
-[`gretel/SoapyPlutoPAPR` @ 238fba5](https://github.com/gretel/SoapyPlutoPAPR/commit/238fba5b6b49155188c2733ac3a3fe78703ebf47)
-on branch [`feature/plutoPAPR`](https://github.com/gretel/SoapyPlutoPAPR/tree/feature/plutoPAPR)
-(fork of [`F5OEO/SoapyPlutoPAPR`](https://github.com/F5OEO/SoapyPlutoPAPR))
+[`gretel/SoapyPlutoPAPR` @ 2d13ba7](https://github.com/gretel/SoapyPlutoPAPR/commit/2d13ba7b5802c26fb590aba7cdc6a32ee76d58b6)
+on branch [`feat-setts`](https://github.com/gretel/SoapyPlutoPAPR/tree/feat-setts)
+(fork of [`F5OEO/SoapyPlutoPAPR`](https://github.com/F5OEO/SoapyPlutoPAPR), synced with
+[`pothosware/SoapyPlutoSDR`](https://github.com/pothosware/SoapyPlutoSDR) master @ fa4b7b0 + feat-setts @ e80d3c6)
 
 *Depends on: `libiio`, `libad9361-iio`*
 
 A SoapySDR module for the PlutoSDR. SoapySDR is the vendor-neutral
 SDR abstraction layer used by GNU Radio, CubicSDR, SDRangel, and
-similar tools. This fork of the upstream Pluto plugin adds CS8 and
-CS12 streaming sample formats on top of the usual float32 — useful
-when USB bandwidth becomes the bottleneck at high sample rates, or
-when passing samples through a gateway that prefers fixed-point.
-The gretel fork carries the `tezuka` -> `plutoPAPR` rename and the
-`ad9361_set_bb_rate`-before-FPGA-rate ordering fix.
+similar tools. The `feat-setts` branch carries the full set of
+fixes: pothosware master (#76, #77), feat-setts (settings API,
+CS12, MTU adaptation, streaming improvements), F5OEO upstream
+(BB-rate ordering fix), and the gretel `tezuka` -> `plutoPAPR`
+rename. No inreplace patches needed.
 
 ### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.2
 

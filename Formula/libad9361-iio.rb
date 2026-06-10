@@ -6,8 +6,8 @@
 class Libad9361Iio < Formula
   desc "IIO AD9361 library for Analog Devices PlutoSDR and ADALM-PLUTO"
   homepage "https://github.com/analogdevicesinc/libad9361-iio"
-  url "https://github.com/analogdevicesinc/libad9361-iio/archive/refs/tags/v0.3.tar.gz"
-  sha256 "1dc35dd997e1938a97489fa1f349ee16889f9de8901a2c7af46184468dc90598"
+  url "https://github.com/analogdevicesinc/libad9361-iio/archive/refs/tags/v0.4.0.tar.gz"
+  sha256 "f4976a1317a0b7cf84727d068be5a52c070539ca7301f0160b0677a429538d87"
   license "LGPL-2.1-or-later"
   head "https://github.com/analogdevicesinc/libad9361-iio.git", branch: "main"
 
@@ -28,20 +28,13 @@ class Libad9361Iio < Formula
     because: "both install libad9361 headers and libraries"
 
   def install
-    # libad9361-iio v0.3 hardcodes `FRAMEWORK TRUE` on the ad9361 target,
-    # forcing a macOS framework bundle instead of the traditional
-    # header+dylib install layout. Strip the property so headers land in
-    # #{include} and the dylib lands in #{lib}. Homebrew-only build-system
-    # patch -- not relevant upstream.
-    inreplace "CMakeLists.txt", "\tFRAMEWORK TRUE\n", "" if OS.mac?
-
-    # libad9361 v0.3 uses cmake_minimum_required(VERSION 2.8.12); CMake 4
-    # dropped support for policies below 3.5, so pass the compatibility
-    # floor. libiio is found via the Homebrew superenv CMAKE_PREFIX_PATH.
+    # libad9361 v0.4.0 uses option(OSX_FRAMEWORK ON), defaulting to a macOS
+    # framework bundle. Pass OFF so headers land in #{include} and the dylib
+    # lands in #{lib}. cmake_minimum_raised to VERSION 3.5.0 so no CMake 4
+    # compat floor needed.
     args = %w[
-      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      -DOSX_FRAMEWORK=OFF
       -DOSX_PACKAGE=OFF
-      -DPYTHON_BINDINGS=OFF
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args

@@ -2,32 +2,34 @@
 # frozen_string_literal: true
 
 # SoapySDR plugin for PlutoSDR with extended PAPR streaming formats
-# (CS12, CS8, PAPR modes).  Tracks the gretel/SoapyPlutoPAPR fork of
-# F5OEO/SoapyPlutoPAPR, which commits the "tezuka" -> "plutoPAPR"
-# rebrand at source level (no inreplace needed) and adds the
-# ad9361_set_bb_rate-before-FPGA-data-port-rate ordering fix that
-# unbreaks sample rates below the AD9361 native FIR-bypass minimum.
+# (CS8, CS12, CS16, CF32).  Tracks the gretel/SoapyPlutoPAPR fork of
+# F5OEO/SoapyPlutoPAPR on the feat-setts branch, which carries the
+# pothosware/SoapyPlutoSDR settings API, CS12 support, MTU
+# adaptation, and streaming improvements rebased onto F5OEO master
+# (rename + BB-rate ordering fix) with the plutoPAPR driver key.
+# No inreplace patches needed.
 class Soapyplutopapr < Formula
   desc "SoapySDR plugin for PlutoSDR with extended PAPR streaming formats"
   homepage "https://github.com/gretel/SoapyPlutoPAPR"
-  # Pinned to the head of feature/plutoPAPR, which carries:
-  #   - ec1c92d  Change Name for tezuka specific features (F5OEO)
-  #   - cee0631  rename: tezuka -> plutoPAPR (CMake, registry, kwarg)
-  #   - 238fba5  fix(settings): ad9361_set_bb_rate before FPGA rate
+  # Pinned to the head of feat-setts, which carries:
+  #   - 95f3139  F5OEO upstream: tezuka rename + BB rate fix
+  #   - ed4c01e  pothosware #76: remove device cache from find
+  #   - 819c58b  pothosware #77: fix tx_streamer bufflen + MTU
+  #   - 2d13ba7  feat-setts + plutoPAPR rename on top
+  # Syncs F5OEO fork with pothosware/SoapyPlutoSDR (master + feat-setts).
   url "https://github.com/gretel/SoapyPlutoPAPR.git",
-      revision: "238fba5b6b49155188c2733ac3a3fe78703ebf47"
-  version "0.2.2+git.20260420"
+      revision: "2d13ba7b5802c26fb590aba7cdc6a32ee76d58b6"
+  version "0.2.2+git.20260610"
   license "LGPL-2.1-or-later"
-  head "https://github.com/gretel/SoapyPlutoPAPR.git", branch: "feature/plutoPAPR"
+  head "https://github.com/gretel/SoapyPlutoPAPR.git", branch: "feat-setts"
 
   livecheck do
-    # Tracked branch is gretel/SoapyPlutoPAPR feature/plutoPAPR (a fork
-    # of F5OEO/SoapyPlutoPAPR). Upstream tags follow `soapy-plutosdr-*`,
-    # which neither the fork name nor the version string matches; auto
-    # bump would always report the fork as out-of-date against the
-    # upstream tag. Bump manually when the fork is rebased onto a new
-    # F5OEO baseline.
-    skip "fork-tracked: gretel/SoapyPlutoPAPR feature/plutoPAPR"
+    # Tracked branch is gretel/SoapyPlutoPAPR feat-setts (a fork
+    # of pothosware/SoapyPlutoSDR feat-setts, rebased onto F5OEO
+    # master + plutoPAPR rename). Upstream tags follow
+    # `soapy-plutosdr-*`, which do not match the fork version.
+    # Bump manually when the fork is rebased onto a new baseline.
+    skip "fork-tracked: gretel/SoapyPlutoPAPR feat-setts"
   end
 
   depends_on "cmake" => :build
