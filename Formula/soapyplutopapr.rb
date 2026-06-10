@@ -6,7 +6,7 @@
 # F5OEO/SoapyPlutoPAPR on the feat-setts branch, which carries the
 # pothosware/SoapyPlutoSDR settings API, CS12 support, MTU
 # adaptation, and streaming improvements rebased onto F5OEO master
-# (rename + BB-rate ordering fix) with the plutoPAPR driver key.
+# (rename + BB-rate ordering fix) with the tezuka driver key.
 # No inreplace patches needed.
 class Soapyplutopapr < Formula
   desc "SoapySDR plugin for PlutoSDR with extended PAPR streaming formats"
@@ -15,10 +15,10 @@ class Soapyplutopapr < Formula
   #   - 95f3139  F5OEO upstream: tezuka rename + BB rate fix
   #   - ed4c01e  pothosware #76: remove device cache from find
   #   - 819c58b  pothosware #77: fix tx_streamer bufflen + MTU
-  #   - 2d13ba7  feat-setts + plutoPAPR rename on top
+  #   - d48d4b9  feat-setts + tezuka driver key
   # Syncs F5OEO fork with pothosware/SoapyPlutoSDR (master + feat-setts).
   url "https://github.com/gretel/SoapyPlutoPAPR.git",
-      revision: "2d13ba7b5802c26fb590aba7cdc6a32ee76d58b6"
+      revision: "d48d4b91ec49e5a4cebfe682df3dc85de84c03c3"
   version "0.2.2+git.20260610"
   license "LGPL-2.1-or-later"
   head "https://github.com/gretel/SoapyPlutoPAPR.git", branch: "feat-setts"
@@ -26,7 +26,7 @@ class Soapyplutopapr < Formula
   livecheck do
     # Tracked branch is gretel/SoapyPlutoPAPR feat-setts (a fork
     # of pothosware/SoapyPlutoSDR feat-setts, rebased onto F5OEO
-    # master + plutoPAPR rename). Upstream tags follow
+    # master + tezuka driver key). Upstream tags follow
     # `soapy-plutosdr-*`, which do not match the fork version.
     # Bump manually when the fork is rebased onto a new baseline.
     skip "fork-tracked: gretel/SoapyPlutoPAPR feat-setts"
@@ -58,7 +58,7 @@ class Soapyplutopapr < Formula
     # so the assertion runs regardless of exit code. The driver loaded
     # successfully if it reports either "No devices found" (no hardware
     # attached) or "Found device" (hardware attached).
-    probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=plutoPAPR 2>&1 || true")
+    probe = shell_output("#{Formula["soapysdr"].opt_bin}/SoapySDRUtil --find=driver=tezuka 2>&1 || true")
     assert_match(/(No devices found|Found device)/, probe)
   end
 end

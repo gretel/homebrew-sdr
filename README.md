@@ -84,20 +84,17 @@ at build time; no FPGA or firmware changes.
 ### [`soapyplutopapr`](https://github.com/gretel/SoapyPlutoPAPR) — 0.2.2+git.20260610
 
 **Pinned:**
-[`gretel/SoapyPlutoPAPR` @ 2d13ba7](https://github.com/gretel/SoapyPlutoPAPR/commit/2d13ba7b5802c26fb590aba7cdc6a32ee76d58b6)
+[`gretel/SoapyPlutoPAPR` @ d48d4b9](https://github.com/gretel/SoapyPlutoPAPR/commit/d48d4b91ec49e5a4cebfe682df3dc85de84c03c3)
 on branch [`feat-setts`](https://github.com/gretel/SoapyPlutoPAPR/tree/feat-setts)
 (fork of [`F5OEO/SoapyPlutoPAPR`](https://github.com/F5OEO/SoapyPlutoPAPR), synced with
 [`pothosware/SoapyPlutoSDR`](https://github.com/pothosware/SoapyPlutoSDR) master @ fa4b7b0 + feat-setts @ e80d3c6)
 
 *Depends on: `libiio`, `libad9361-iio`*
 
-A SoapySDR module for the PlutoSDR. SoapySDR is the vendor-neutral
-SDR abstraction layer used by GNU Radio, CubicSDR, SDRangel, and
-similar tools. The `feat-setts` branch carries the full set of
-fixes: pothosware master (#76, #77), feat-setts (settings API,
-CS12, MTU adaptation, streaming improvements), F5OEO upstream
-(BB-rate ordering fix), and the gretel `tezuka` -> `plutoPAPR`
-rename. No inreplace patches needed.
+The `feat-setts` branch carries the full set of fixes: pothosware
+master (#76, #77), feat-setts (settings API, CS12, MTU adaptation,
+streaming improvements), F5OEO upstream (BB-rate ordering fix),
+and `tezuka` driver key. No inreplace patches needed.
 
 ### [`soapyuhd`](https://github.com/pothosware/SoapyUHD) — 0.4.2
 
