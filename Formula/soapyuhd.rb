@@ -15,7 +15,7 @@
 # It needs three Homebrew-side workarounds (CMake 4 policy, C++17 bump
 # for UHD 4.10 headers, missing boost/lexical_cast.hpp include).
 #
-# `brew install --HEAD` builds gretel/SoapyUHD master, the modernized
+# `brew install --HEAD` builds gretel/SoapyUHD dev, the modernized
 # fork (C++20, Boost-free, target-scoped CMake, UHD 4.10 native, post
 # 76f6923 hot-path channel-count cache). No inreplace patches needed
 # in the fork build path.
@@ -34,19 +34,19 @@ class Soapyuhd < Formula
   revision 3
 
   stable do
-    # Pothosware upstream master tip post-0.4.1, pinned by SHA so the
+    # Upstream master tip post-0.4.1, pinned by SHA so the
     # default install is reproducible across upstream pushes.
     url "https://github.com/pothosware/SoapyUHD/archive/2a5d381f68fd05d5b3c0e7db56c36892ea99b4ae.tar.gz"
     version "0.4.2"
     sha256 "a28c38123d9b96d54834acab54a839372bbb1ba456bfa34233bfad079333c170"
 
-    # Pothosware still uses boost::lexical_cast / boost::format /
+    # Upstream still uses boost::lexical_cast / boost::format /
     # boost::bind. The gretel HEAD fork has purged Boost entirely.
     depends_on "boost"
   end
 
   head do
-    url "https://github.com/gretel/SoapyUHD.git", branch: "master"
+    url "https://github.com/gretel/SoapyUHD.git", branch: "dev"
   end
 
   depends_on "cmake" => :build
