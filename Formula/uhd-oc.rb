@@ -190,7 +190,7 @@ __END__
 --- a/host/lib/usrp/common/ad9361_driver/ad9361_device.cpp
 +++ b/host/lib/usrp/common/ad9361_driver/ad9361_device.cpp
 @@ -81,7 +81,7 @@
- 
+
  const double ad9361_device_t::AD9361_MAX_GAIN         = 89.75;
  const double ad9361_device_t::AD9361_MIN_CLOCK_RATE   = 220e3;
 -const double ad9361_device_t::AD9361_MAX_CLOCK_RATE   = 61.44e6;
@@ -200,7 +200,7 @@ __END__
  const double ad9361_device_t::AD9361_MIN_BW = 200e3;
 @@ -1217,7 +1217,7 @@
      int vcodiv;
- 
+
      /* Iterate over VCO dividers until appropriate divider is found. */
 -    int i = 1;
 +    int i = 0;
@@ -215,11 +215,11 @@ __END__
 +    } else if ((rate > 58e6) && (rate <= 70e6)) {
          // RX1 + RX2 enabled, 2, 1, 2, 2
          _regs.rxfilt = B8(11001110);
- 
+
 -
          // TX1 + TX2 enabled, 2, 1, 1, 2
          _regs.txfilt = B8(11010010);
- 
+
          divfactor    = 8;
          _tfir_factor = 2;
          _rfir_factor = 2;
@@ -237,7 +237,7 @@ __END__
 @@ -1543,6 +1550,12 @@
      _io_iface->poke8(0x004, _regs.inputsel);
      _io_iface->poke8(0x00A, _regs.bbpll);
- 
+
 +    if (rate > 100e6) {
 +        _io_iface->poke8(0x006, 0x0A); // Decrease RX timings above 100e6
 +    } else {
@@ -246,11 +246,11 @@ __END__
 +
      UHD_LOG_TRACE("AD936X", "[ad9361_device_t::_setup_rates] adcclk=" << adcclk);
      _baseband_bw = (adcclk / divfactor);
- 
+
 @@ -1566,8 +1579,8 @@
      const size_t num_tx_taps = get_num_taps(max_tx_taps);
      const size_t num_rx_taps = get_num_taps(max_rx_taps);
- 
+
 -    _setup_tx_fir(num_tx_taps, _tfir_factor);
 -    _setup_rx_fir(num_rx_taps, _rfir_factor);
 +    if (_tfir_factor != 0) {_setup_tx_fir(num_tx_taps, _tfir_factor);}
@@ -261,7 +261,7 @@ __END__
 @@ -1857,7 +1870,7 @@
  {
      std::lock_guard<std::recursive_mutex> lock(_mutex);
- 
+
 -    if (req_rate > 61.44e6) {
 +    if (req_rate > 122.88e6) {
          throw uhd::runtime_error(
